@@ -1,15 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatelessWidget {
-  final String userName;
+class HomeScreen extends StatefulWidget {
+  final bool isDarkTheme;
 
-  const HomeScreen({super.key, this.userName = 'Isabeli'});
+  const HomeScreen({
+    Key? key,
+    this.isDarkTheme = false,
+  }) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String userName = 'Estudante';
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserName();
+  }
+
+  Future<void> loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('userName') ?? 'Estudante';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Resumo do Dia'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('isLoggedIn', false);
+              await prefs.remove('userName');
+              Navigator.pushReplacementNamed(context, '/');
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -17,11 +52,6 @@ class HomeScreen extends StatelessWidget {
             DrawerHeader(
               decoration: BoxDecoration(color: Theme.of(context).primaryColor),
               child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
-            ),
-            ListTile(
-              leading: Icon(Icons.book),
-              title: Text('Matérias'),
-              onTap: () => Navigator.pushNamed(context, '/subjects'),
             ),
             ListTile(
               leading: Icon(Icons.calendar_month),
@@ -63,7 +93,7 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Card(
               elevation: 3,
               child: ListTile(
@@ -72,7 +102,7 @@ class HomeScreen extends StatelessWidget {
                 subtitle: Text("Matemática - 10h\nHistória - 13h"),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Card(
               elevation: 3,
               child: ListTile(
@@ -81,7 +111,7 @@ class HomeScreen extends StatelessWidget {
                 subtitle: Text("Estudar capítulo 5 de História\nResolver exercícios de Matemática"),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Wrap(
               spacing: 10,
               children: [

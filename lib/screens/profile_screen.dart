@@ -1,30 +1,45 @@
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
+  final bool isDarkTheme; // Recebe o estado atual do tema
   final Function(bool)? onThemeChanged;
 
-
-  const ProfileScreen({Key? key, this.onThemeChanged}) : super(key: key);
-
+  const ProfileScreen({
+    Key? key,
+    this.isDarkTheme = false,
+    this.onThemeChanged,
+  }) : super(key: key);
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool isDarkTheme = false;
+  late bool isDarkTheme;
   bool showPassword = false;
 
-
-  final String name = "João da Silva";
-  final String email = "joao@email.com";
-  final String password = "minhaSenha123"; 
-
+  String name = '';
+  String email = '';
+  String password = '';
 
   String get encryptedPassword => List.filled(password.length, '•').join();
 
+  @override
+  void initState() {
+    super.initState();
+    isDarkTheme = widget.isDarkTheme;
+    loadUserData();
+  }
+
+  Future<void> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      name = prefs.getString('userName') ?? 'Nome não encontrado';
+      email = prefs.getString('userEmail') ?? 'Email não encontrado';
+      password = prefs.getString('userPassword') ?? '••••••••';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +48,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text("Informações do Usuário",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            "Informações do Usuário",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           ListTile(
             leading: const Icon(Icons.person),
@@ -61,35 +78,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const Divider(height: 32),
           SwitchListTile(
-            title: const Text('Tema Claro / Escuro'),
-            value: isDarkTheme,
-            onChanged: (val) {
-              setState(() => isDarkTheme = val);
-              widget.onThemeChanged?.call(val);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Notificações'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              // Implementar futuramente
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.cloud_sync),
-            title: const Text('Backup e Sincronização'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              // Implementar futuramente
-            },
-          ),
+  title: const Text('Tema Claro / Escuro'),
+  value: isDarkTheme,
+  onChanged: (val) {
+    setState(() {
+      isDarkTheme = val;
+    });
+    widget.onThemeChanged?.call(val);
+  },
+),
+
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Sair'),
-            onTap: () {
-              Navigator.pop(context); // ou navegar para login
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('isLoggedIn', false);
+              Navigator.pushReplacementNamed(context, '/');
             },
           ),
         ],
