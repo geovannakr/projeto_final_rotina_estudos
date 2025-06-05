@@ -12,12 +12,15 @@ dependencies:
     sdk: flutter
   table_calendar: ^3.0.8
   shared_preferences: 2.5.3
+  http: ^1.4.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 flutter:
+  assets:
+    - lib/assets/image.png
   uses-material-design: true
 
   # assets:

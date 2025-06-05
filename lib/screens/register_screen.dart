@@ -4,24 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool isLoading = false;
 
-  Future<void> loginUser() async {
+  Future<void> registerUser() async {
+    String name = nameController.text.trim();
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
       showMessage('Preencha todos os campos');
       return;
     }
@@ -32,36 +34,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://user-api-6z73.onrender.com/api/login'),
+        Uri.parse('https://user-api-6z73.onrender.com/api/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+        }),
       ).timeout(const Duration(seconds: 30));
 
-      print('Status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        late Map<String, dynamic> data;
-        try {
-          data = jsonDecode(response.body);
-          print('Dados decodificados: $data');
-        } catch (e) {
-          showMessage('Erro ao interpretar resposta. Detalhes: $e');
-          return;
-        }
-
+      if (response.statusCode == 201 || response.statusCode == 200) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('userName', name);
         await prefs.setString('userEmail', email);
-        await prefs.setString('userName', data['name']?.toString() ?? '');
 
         Navigator.pushReplacementNamed(context, '/home');
-      } else if (response.statusCode == 404) {
-        showMessage('Usuário não cadastrado.');
-      } else if (response.statusCode == 401) {
-        showMessage('Senha incorreta.');
+      } else if (response.statusCode == 409) {
+        showMessage('Email já cadastrado. Faça login.');
       } else {
-        showMessage('Erro no login. Código: ${response.statusCode}');
+        showMessage('Erro no cadastro. Código: ${response.statusCode}');
       }
     } on TimeoutException {
       showMessage('Tempo de conexão esgotado. Tente novamente.');
@@ -71,7 +63,6 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         isLoading = false;
       });
-      print('Finalizou login');
     }
   }
 
@@ -81,16 +72,12 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void navigateToRegister() {
-    Navigator.pushNamed(context, '/register');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Cadastro'),
         backgroundColor: const Color(0xFF0077FF),
       ),
       body: SafeArea(
@@ -100,7 +87,13 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Image.asset('assets/image.png', height: 120),
                   const SizedBox(height: 24),
+                  TextField(
+                    controller: nameController,
+                    decoration: inputDecoration('Nome', Icons.person),
+                  ),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: emailController,
                     decoration: inputDecoration('Email', Icons.email),
@@ -118,18 +111,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 50,
                     child: ElevatedButton(
                       style: elevatedButtonStyle(),
-                      onPressed: isLoading ? null : loginUser,
+                      onPressed: isLoading ? null : registerUser,
                       child: isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Entrar', style: TextStyle(fontSize: 18)),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: isLoading ? null : navigateToRegister,
-                    child: const Text(
-                      'Não tem conta? Cadastre-se',
-                      style: TextStyle(color: Color(0xFF0077FF)),
+                          : const Text('Cadastrar', style: TextStyle(fontSize: 18)),
                     ),
                   ),
                 ],

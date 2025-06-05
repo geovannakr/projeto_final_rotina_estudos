@@ -149,25 +149,27 @@ class _TasksScreenState extends State<TasksScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Nova Tarefa/Prova'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: titleController, decoration: InputDecoration(labelText: 'Título')),
-            TextField(controller: subjectController, decoration: InputDecoration(labelText: 'Matéria')),
-            TextField(
-              controller: dateController,
-              decoration: InputDecoration(labelText: 'Data (dd/mm/aaaa)'),
-              keyboardType: TextInputType.datetime,
-            ),
-            ValueListenableBuilder(
-              valueListenable: isExamController,
-              builder: (_, isExam, __) => CheckboxListTile(
-                title: Text("É uma prova?"),
-                value: isExam,
-                onChanged: (val) => isExamController.value = val ?? false,
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: titleController, decoration: InputDecoration(labelText: 'Título')),
+              TextField(controller: subjectController, decoration: InputDecoration(labelText: 'Matéria')),
+              TextField(
+                controller: dateController,
+                decoration: InputDecoration(labelText: 'Data (dd/mm/aaaa)'),
+                keyboardType: TextInputType.datetime,
               ),
-            ),
-          ],
+              ValueListenableBuilder(
+                valueListenable: isExamController,
+                builder: (_, isExam, __) => CheckboxListTile(
+                  title: Text("É uma prova?"),
+                  value: isExam,
+                  onChanged: (val) => isExamController.value = val ?? false,
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -240,7 +242,8 @@ class _TasksScreenState extends State<TasksScreen> {
                 child: Card(
                   child: CheckboxListTile(
                     title: Text(task['title']),
-                    subtitle: Text('${task['subject']} • Entrega: ${task['dueDate']} • Prioridade: ${task['priority']}'),
+                    subtitle: Text(
+                        '${task['subject']} • Entrega: ${task['dueDate']} • Prioridade: ${task['priority']}'),
                     value: task['done'],
                     onChanged: (value) => _toggleTaskDone(index, value),
                   ),

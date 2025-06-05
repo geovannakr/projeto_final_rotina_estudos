@@ -31,12 +31,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final cardColor = isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF6F6F6);
+    final iconColor = isDark ? Colors.blue[200] : Colors.blue[800];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Resumo do Dia'),
+        title: const Text('Resumo do Dia'),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: textColor,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sair',
             onPressed: () async {
               final prefs = await SharedPreferences.getInstance();
               await prefs.setBool('isLoggedIn', false);
@@ -47,89 +56,150 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       drawer: Drawer(
-        child: ListView(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-              child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
-            ),
-            ListTile(
-              leading: Icon(Icons.calendar_month),
-              title: Text('Calendário'),
-              onTap: () => Navigator.pushNamed(context, '/calendar'),
-            ),
-            ListTile(
-              leading: Icon(Icons.task),
-              title: Text('Tarefas e Provas'),
-              onTap: () => Navigator.pushNamed(context, '/tasks'),
-            ),
-            ListTile(
-              leading: Icon(Icons.bar_chart),
-              title: Text('Desempenho'),
-              onTap: () => Navigator.pushNamed(context, '/performance'),
-            ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Perfil'),
-              onTap: () => Navigator.pushNamed(context, '/profile'),
-            ),
-          ],
+        child: Container(
+          color: isDark ? const Color(0xFF121212) : Colors.white,
+          child: ListView(
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.blueGrey[800] : Colors.blueAccent,
+                ),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              _drawerItem(Icons.calendar_month, 'Calendário', '/calendar'),
+              _drawerItem(Icons.task, 'Tarefas e Provas', '/tasks'),
+              _drawerItem(Icons.bar_chart, 'Desempenho', '/performance'),
+              _drawerItem(Icons.person, 'Perfil', '/profile'),
+            ],
+          ),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             RichText(
               text: TextSpan(
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 22,
+                      color: textColor,
+                    ),
                 children: [
-                  TextSpan(text: "Bom dia, "),
+                  const TextSpan(text: "Bom dia, "),
                   TextSpan(
                     text: "$userName!",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            Card(
-              elevation: 3,
-              child: ListTile(
-                leading: Icon(Icons.class_),
-                title: Text("Aulas do Dia"),
-                subtitle: Text("Matemática - 10h\nHistória - 13h"),
-              ),
+            _customCard(
+              icon: Icons.class_,
+              title: 'Aulas do Dia',
+              subtitle: 'Matemática - 10h\nHistória - 13h',
+              iconColor: Colors.black,
+              cardColor: cardColor,
+              textColor: textColor,
             ),
             const SizedBox(height: 16),
-            Card(
-              elevation: 3,
-              child: ListTile(
-                leading: Icon(Icons.check_box),
-                title: Text("Tarefas Pendentes"),
-                subtitle: Text("Estudar capítulo 5 de História\nResolver exercícios de Matemática"),
-              ),
+            _customCard(
+              icon: Icons.check_box,
+              title: 'Tarefas Pendentes',
+              subtitle: 'Estudar capítulo 5 de História\nResolver exercícios de Matemática',
+              iconColor: Colors.black,
+              cardColor: cardColor,
+              textColor: textColor,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Wrap(
-              spacing: 10,
+              spacing: 12,
+              runSpacing: 12,
               children: [
                 ElevatedButton.icon(
                   onPressed: () => Navigator.pushNamed(context, '/tasks'),
-                  icon: Icon(Icons.add),
-                  label: Text("Adicionar Tarefa"),
+                  icon: const Icon(Icons.add),
+                  label: const Text("Adicionar Tarefa"),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
                 ElevatedButton.icon(
                   onPressed: () => Navigator.pushNamed(context, '/calendar'),
-                  icon: Icon(Icons.calendar_today),
-                  label: Text("Ver Calendário"),
+                  icon: const Icon(Icons.calendar_today),
+                  label: const Text("Ver Calendário"),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    backgroundColor: Colors.green.shade600,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _customCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color iconColor,
+    required Color cardColor,
+    required Color textColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          )
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        leading: Icon(icon, color: iconColor, size: 28),
+        title: Text(
+          title,
+          style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(color: textColor.withOpacity(0.75)),
+        ),
+      ),
+    );
+  }
+
+  Widget _drawerItem(IconData icon, String title, String route) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.pushNamed(context, route);
+      },
     );
   }
 }

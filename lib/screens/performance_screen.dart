@@ -19,47 +19,62 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Adicionar Nota'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: materiaController,
-              decoration: InputDecoration(labelText: 'Matéria'),
-            ),
-            TextField(
-              controller: notaController,
-              decoration: InputDecoration(labelText: 'Nota'),
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final bgColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+        final textColor = isDark ? Colors.white : Colors.black;
+
+        return AlertDialog(
+          backgroundColor: bgColor,
+          title: Text('Adicionar Nota', style: TextStyle(color: textColor)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: materiaController,
+                decoration: InputDecoration(
+                  labelText: 'Matéria',
+                  labelStyle: TextStyle(color: textColor),
+                ),
+                style: TextStyle(color: textColor),
+              ),
+              TextField(
+                controller: notaController,
+                decoration: InputDecoration(
+                  labelText: 'Nota',
+                  labelStyle: TextStyle(color: textColor),
+                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                style: TextStyle(color: textColor),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                String materia = materiaController.text.trim();
+                double? nota = double.tryParse(notaController.text);
+
+                if (materia.isEmpty || nota == null) {
+                  Navigator.pop(context);
+                  return;
+                }
+
+                setState(() {
+                  if (_notasPorMateria.containsKey(materia)) {
+                    _notasPorMateria[materia]!.add(nota);
+                  } else {
+                    _notasPorMateria[materia] = [nota];
+                  }
+                });
+
+                Navigator.pop(context);
+              },
+              child: const Text('Salvar'),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              String materia = materiaController.text.trim();
-              double? nota = double.tryParse(notaController.text);
-
-              if (materia.isEmpty || nota == null) {
-                Navigator.pop(context);
-                return;
-              }
-
-              setState(() {
-                if (_notasPorMateria.containsKey(materia)) {
-                  _notasPorMateria[materia]!.add(nota);
-                } else {
-                  _notasPorMateria[materia] = [nota];
-                }
-              });
-
-              Navigator.pop(context);
-            },
-            child: Text('Salvar'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -79,10 +94,19 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
 
     final baixoDesempenho = desempenho.where((e) => e.average < 7).toList();
 
+    final textColor = isDark ? Colors.white : Colors.black;
+    final cardColor = isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF2F2F2);
+
     return Scaffold(
-      appBar: AppBar(title: Text('Desempenho')),
+      appBar: AppBar(
+        title: const Text('Desempenho'),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: textColor,
+        elevation: 0,
+        centerTitle: true,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -91,50 +115,79 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
+                color: textColor,
               ),
             ),
-            SizedBox(height: 16),
-            ...desempenho.map((perf) => Padding(
-                  padding: EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    '${perf.subject}: ${perf.average.toStringAsFixed(1)}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: perf.average < 7
-                          ? Colors.red
-                          : (isDark ? Colors.white : Colors.black),
+            const SizedBox(height: 16),
+            ...desempenho.map((perf) => Container(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: perf.average < 7 ? Colors.red : Colors.transparent,
+                      width: 1.2,
                     ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        perf.subject,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: textColor,
+                        ),
+                      ),
+                      Text(
+                        perf.average.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: perf.average < 7
+                              ? Colors.red
+                              : (isDark ? Colors.greenAccent : Colors.green),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 )),
-            SizedBox(height: 20),
-            baixoDesempenho.isEmpty
-                ? Text(
-                    'Nenhum alerta de baixo desempenho',
-                    style: TextStyle(
-                      color: Colors.green.shade700,
+            const SizedBox(height: 20),
+            Text(
+              'Alertas',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (baixoDesempenho.isEmpty)
+              Text(
+                'Nenhum alerta de baixo desempenho',
+                style: TextStyle(color: Colors.green.shade700),
+              )
+            else
+              ...baixoDesempenho.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    '⚠ Baixo desempenho em ${e.subject} (média: ${e.average.toStringAsFixed(1)})',
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.w600,
                     ),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: baixoDesempenho
-                        .map(
-                          (e) => Text(
-                            'Atenção: Desempenho baixo em ${e.subject} (média: ${e.average.toStringAsFixed(1)})',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                        .toList(),
                   ),
+                ),
+              ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _adicionarNota,
-        child: Icon(Icons.add),
+        backgroundColor: Colors.blueAccent,
+        child: const Icon(Icons.add),
         tooltip: 'Adicionar nota',
       ),
     );
