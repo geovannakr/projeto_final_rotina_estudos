@@ -35,8 +35,7 @@ Acompanhe sua evolução com gráficos por matérias e alertas
 ---
 ## GIF Mostrando o App e suas funcionalidades:
 
-
-
+![Vídeo curto do app funcionando com todas as suas funcionalidades](.gif)
 
 ## Tecnologias Utilizadas
 
