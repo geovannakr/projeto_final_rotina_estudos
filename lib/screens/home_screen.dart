@@ -83,6 +83,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+            tooltip: 'Abrir Chat',
+            onPressed: () {
+              Navigator.pushNamed(context, '/chat');
+            },
+          ),
+        ],
       ),
       extendBodyBehindAppBar: true,
       body: Container(

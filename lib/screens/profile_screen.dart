@@ -1,34 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfileScreen extends StatefulWidget {
-  final bool isDarkTheme;
-  final Function(bool)? onThemeChanged;
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
 
-  const ProfileScreen({
-    Key? key,
-    this.isDarkTheme = false,
-    this.onThemeChanged,
-  }) : super(key: key);
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
 
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
+    await prefs.clear();
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  late bool isDarkTheme;
-
-  @override
-  void initState() {
-    super.initState();
-    isDarkTheme = widget.isDarkTheme;
+    if (context.mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = isDarkTheme ? const Color(0xFF121212) : Colors.white;
-    final textColor = isDarkTheme ? Colors.white : const Color(0xFF1565C0);
-    final cardColor = isDarkTheme ? const Color(0xFF1A1A1A) : const Color(0xFFF1F7FF);
+    const backgroundColor = Color(0xFF121212);
+    const textColor = Colors.white;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -36,8 +25,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: backgroundColor,
         elevation: 2,
         centerTitle: true,
-        iconTheme: IconThemeData(color: textColor),
-        title: Text(
+        iconTheme: const IconThemeData(color: textColor),
+        title: const Text(
           'Perfil',
           style: TextStyle(
             color: textColor,
@@ -58,52 +47,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(80),
               child: Image.asset(
-                'lib/assets/image.png', // Seu logo
+                'lib/assets/image.png', 
                 width: 120,
                 height: 120,
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          const SizedBox(height: 32),
-
-          Container(
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blueAccent.withOpacity(0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: SwitchListTile(
-              title: Text(
-                'Tema Claro / Escuro',
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18,
-                ),
-              ),
-              value: isDarkTheme,
-              onChanged: (val) {
-                setState(() {
-                  isDarkTheme = val;
-                });
-                widget.onThemeChanged?.call(val);
-              },
-              activeColor: Colors.blueAccent,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ),
-
           const SizedBox(height: 32),
 
           ListTile(
@@ -120,16 +70,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fontSize: 18,
               ),
             ),
-            onTap: () async {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.clear();
-              if (context.mounted) {
-                Navigator.pushReplacementNamed(context, '/');
-              }
-            },
+            onTap: () => _logout(context),
           ),
         ],
       ),
     );
   }
-} 
+}

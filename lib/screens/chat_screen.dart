@@ -34,37 +34,91 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(12);
+
     return Scaffold(
-      appBar: AppBar(title: const Text("SAIM - Chat IA")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      appBar: AppBar(
+        title: const Text("SAIM - Chat IA"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        centerTitle: true,
+      ),
+      extendBodyBehindAppBar: true,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0F2027),
+              Color(0xFF203A43),
+              Color(0xFF2C5364),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 24, 16, 16),
         child: Column(
           children: [
             TextField(
               controller: _controller,
-              decoration: const InputDecoration(
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
                 labelText: "Digite sua pergunta...",
-                border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.1),
+                border: OutlineInputBorder(
+                  borderRadius: borderRadius,
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: borderRadius,
+                  borderSide: const BorderSide(color: Colors.lightBlueAccent),
+                ),
               ),
               onSubmitted: (_) => enviarPergunta(),
             ),
             const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: carregando ? null : enviarPergunta,
-              child: const Text("Enviar"),
-            ),
-            const SizedBox(height: 20),
-            if (carregando)
-              const CircularProgressIndicator()
-            else if (resposta.isNotEmpty)
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Text(
-                    resposta,
-                    style: const TextStyle(fontSize: 16),
-                  ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: carregando ? null : enviarPergunta,
+                icon: const Icon(Icons.send),
+                label: const Text("Enviar"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E88E5),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: borderRadius),
                 ),
               ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: Center(
+                child: carregando
+                    ? const CircularProgressIndicator(color: Colors.lightBlueAccent)
+                    : resposta.isNotEmpty
+                        ? SingleChildScrollView(
+                            child: Text(
+                              resposta,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            'Faça uma pergunta para começar a conversa.',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.6),
+                              fontStyle: FontStyle.italic,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+              ),
+            ),
           ],
         ),
       ),

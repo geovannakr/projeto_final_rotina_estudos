@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
           initialRoute: isLoggedIn ? '/home' : '/login',
           routes: {
             '/login': (context) => const LoginScreen(),
-            '/home': (context) => const HomeScreen(),
+            '/home': (context) => HomeScreen(),
             '/calendar': (context) => const CalendarScreen(),
             '/tasks': (context) => const TasksScreen(),
             '/performance': (context) => const PerformanceScreen(),
