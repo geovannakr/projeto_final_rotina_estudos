@@ -33,6 +33,7 @@ Acompanhe sua evolução com gráficos por matérias e alertas
 Acompanhe sua evolução com gráficos por matérias e alertas 
 
 ---
+## GIF Mostrando o App e suas funcionalidades:
 
 
 
