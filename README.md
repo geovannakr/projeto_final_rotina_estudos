@@ -35,7 +35,7 @@ Acompanhe sua evolução com gráficos por matérias e alertas
 ---
 ## GIF Mostrando o App e suas funcionalidades:
 
-![Vídeo curto do app funcionando com todas as suas funcionalidades](.gif)
+![Demonstração do App StudyFlow - Rotina de Estudos](lib/assets/Projeto%20Final%20Programa%C3%A7%C3%A3o%20Mobile%20-%20App%20Rotina%20de%20Estudos%20StudyFlow.gif)
 
 ## Tecnologias Utilizadas
 
