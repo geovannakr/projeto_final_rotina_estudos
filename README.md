@@ -74,6 +74,19 @@ bash
    
 
 ---
+Desenvolvedores
+Este projeto foi desenvolvido por:
+
+Geovanna de Sousa Krüger
+(https://github.com/geovannakr)
+
+Isabeli Ferreira
+(https://github.com/isabelic)
+
+Paulo Stiphen
+(https://github.com/paulostiphen)
+
+---
 ##  Licença
 
 Este projeto está licenciado sob a licença MIT. Para mais detalhes, consulte o arquivo LICENSE.
